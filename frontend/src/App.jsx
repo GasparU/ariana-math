@@ -19,17 +19,30 @@ import ParentExamPreview from "./components/views/ParentExamPreview";
 import StudentExamView from "./pages/student/StudentExamView";
 import StudentDashboard from "./components/views/StudentDashboard";
 import ReviewExamView from "./pages/shared/ReviewExamView";
+import AnalyticsDashboard from "./components/views/AnalyticsDashboard";
 
 const App = () => {
   const [user, setUser] = useState(null); // 'parent' | 'student'
 
   useEffect(() => {
+    // 1. Validar identidad persistente (Visitor ID)
+    const existingId = localStorage.getItem("app_visitor_identity");
+    if (!existingId) {
+      console.warn(
+        "⚠️ Crítico: visitor_id no encontrado. El sistema de cuotas fallará."
+      );
+      // Aquí podrías disparar la lógica de telemetry.js si fuera necesario
+    }
+
+    // 2. Gestión de Roles (Tu código original mejorado)
     if (user) {
       localStorage.setItem("app_user_role", user);
-      if (user === "parent" && window.location.pathname !== "/parent") {
-        window.history.replaceState(null, "", "/");
+      // Evitamos bucles de redirección innecesarios
+      if (user === "parent" && window.location.pathname === "/") {
+        window.history.replaceState(null, "", "/parent");
       }
     } else {
+      // Importante: Solo removemos el rol, NUNCA el visitor_identity
       localStorage.removeItem("app_user_role");
     }
   }, [user]);
@@ -101,6 +114,17 @@ const App = () => {
           element={
             user === "parent" ? (
               <HistoryView userRole="parent" />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/admin/radar"
+          element={
+            user === "parent" ? (
+              <AnalyticsDashboard />
             ) : (
               <Navigate to="/" replace />
             )

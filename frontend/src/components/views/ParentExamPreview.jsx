@@ -55,6 +55,7 @@ const ParentExamPreview = () => {
 
     try {
       // Recuperamos los datos
+      const currentVisitorId = localStorage.getItem("app_visitor_identity");
       const params = location.state?.params || {};
 
       const examToSave = {
@@ -63,6 +64,7 @@ const ParentExamPreview = () => {
         grade_level: params.grade || "General",
         difficulty: params.difficulty || "Medium",
         content: exam.content,
+        visitor_id: currentVisitorId,
         num_questions: parseInt(
           params.questionCount || exam.content.questions?.length || 5,
           10

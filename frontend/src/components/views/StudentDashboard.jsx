@@ -25,10 +25,11 @@ const StudentDashboard = () => {
     try {
       setLoading(true);
 
+      const currentId = localStorage.getItem("app_visitor_identity");
       // 1. Pedimos Exámenes y Resultados en paralelo
       const [examsRes, resultsRes] = await Promise.all([
-        api.exams.list(),
-        api.results.listByStudent("Ariana"), // Usamos el nombre del estudiante actual
+        api.exams.getAll(currentId), // Usar getAll que ya corregimos con visitorId
+        api.results.listByStudent("Ariana"),
       ]);
 
       const examsData = examsRes.data || examsRes;

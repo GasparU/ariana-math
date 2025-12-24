@@ -20,26 +20,108 @@ export class ExamService {
     this.supabase = createClient(sbUrl, sbKey);
   }
 
-  // --- MÉTODO 1: VISTA PREVIA ---
-  async preview(createExamDto: CreateExamDto) {
+  
+  async preview(createExamDto: CreateExamDto, visitorId: string = 'anon') {
+    const MY_ADMIN_ID = '02e393ce-f956-442b-910e-bcef69bffa1d';
     try {
-      const examContent = await this.geminiService.generateExam(createExamDto);
-      return examContent;
+      // 1. Obtenemos TODOS los exámenes de este visitante para contar por modelo usado
+      const { data: userExams, error: dbError } = await this.supabase
+        .from('exams')
+        .select('content')
+        .eq('visitor_id', visitorId);
+
+      if (dbError) throw dbError;
+
+      // 2. Contabilizamos el uso por cada proveedor de IA
+      const geminiUsed =
+        userExams?.filter((e) =>
+          e.content?.usedModel?.toLowerCase().includes('gemini'),
+        ).length ?? 0;
+
+      const deepseekUsed =
+        userExams?.filter((e) =>
+          e.content?.usedModel?.toLowerCase().includes('deepseek'),
+        ).length ?? 0;
+
+      // 3. Configuración de Seguridad y Fallbacks
+      // Reemplaza el string de abajo por tu visitor_id completo de Supabase
+      const IS_ADMIN = visitorId === MY_ADMIN_ID;
+      const selectedModel = createExamDto.aiModel || 'gemini-1.5-flash';
+      const modelLower = selectedModel.toLowerCase();
+      let maxQuestions = 10;
+
+      // 4. Lógica de Validación de Cuotas (Bypass para Admin)
+      if (!IS_ADMIN) {
+        if (modelLower.includes('gemini')) {
+          if (geminiUsed >= 4) {
+            throw new InternalServerErrorException(
+              `Cuota de Gemini Pro agotada (${geminiUsed}/4). Por favor, prueba con el motor DeepSeek.`,
+            );
+          }
+          maxQuestions = 10;
+        } else if (modelLower.includes('deepseek')) {
+          if (deepseekUsed >= 10) {
+            throw new InternalServerErrorException(
+              `Cuota de DeepSeek agotada (${deepseekUsed}/10). Has alcanzado el límite de la demo técnica.`,
+            );
+          }
+          maxQuestions = 20;
+        }
+      } else {
+        // Modo Administrador: Acceso total y mayor volumen de preguntas
+        maxQuestions = 20;
+        console.log('👑 Acceso Administrador: Bypass de cuotas activado.');
+      }
+
+      // 5. Preparación del DTO final y envío a la IA
+      const finalDto = {
+        ...createExamDto,
+        aiModel: selectedModel,
+        num_questions: Math.min(createExamDto.num_questions, maxQuestions),
+      };
+
+      const examContent = await this.geminiService.generateExam(finalDto);
+
+      // 6. Retorno con metadatos para el Frontend
+      return {
+        ...examContent,
+        usedModel: selectedModel,
+        stats: {
+          // Si es admin 999, si no, restamos el usado + 1 (el actual)
+          geminiRemaining: IS_ADMIN
+            ? 999
+            : Math.max(
+                0,
+                4 -
+                  (modelLower.includes('gemini') ? geminiUsed + 1 : geminiUsed),
+              ),
+          deepseekRemaining: IS_ADMIN
+            ? 999
+            : Math.max(
+                0,
+                10 -
+                  (modelLower.includes('deepseek')
+                    ? deepseekUsed + 1
+                    : deepseekUsed),
+              ),
+          isAdmin: IS_ADMIN,
+        },
+      };
     } catch (error) {
-      console.error('❌ Error en PREVIEW:', error); // <--- LOG IMPORTANTE
+      console.error('❌ Error en el proceso de Preview:', error.message);
       throw new InternalServerErrorException(error.message);
     }
   }
 
-  // --- MÉTODO CREATE (CON LÓGICA SOLVER-ON-SAVE) ---
-  async create(createExamDto: CreateExamDto, userId: string = 'anon') {
+  async create(createExamDto: CreateExamDto, visitorId: string = 'anon') {
     try {
       let examContent = createExamDto.content;
 
+      // 1. Si no hay contenido previo (edición), generamos uno nuevo
       if (!examContent) {
-        // Generación normal (automática)
         examContent = await this.geminiService.generateExam(createExamDto);
       } else {
+        // 2. Si viene de edición, recalculamos para asegurar calidad
         console.log('♻️ Recalculando solucionarios para examen editado...');
         examContent = await this.recalculateSolutions(
           examContent,
@@ -48,7 +130,7 @@ export class ExamService {
         );
       }
 
-      // Guardado en BD (Sin cambios)
+      // 3. Guardado en BD incluyendo el visitor_id para el contador de cuotas
       const { data, error } = await this.supabase
         .from('exams')
         .insert({
@@ -56,9 +138,10 @@ export class ExamService {
           grade_level: createExamDto.grade_level,
           topic: createExamDto.topic,
           difficulty: createExamDto.difficulty,
-          content: examContent,
+          content: { ...examContent, usedModel: createExamDto.aiModel }, // Guardamos el modelo usado
           num_questions: createExamDto.num_questions,
           time_limit: createExamDto.time_limit,
+          visitor_id: visitorId, // 🔥 CRÍTICO: Vinculamos el examen al visitante
         })
         .select()
         .single();
@@ -71,11 +154,21 @@ export class ExamService {
     }
   }
 
-  async findAll() {
-    const { data, error } = await this.supabase
+  async findAll(visitorId: string = 'anon') {
+    const MY_ADMIN_ID = '02e393ce-f956-442b-910e-bcef69bffa1d';
+    const IS_ADMIN = visitorId === MY_ADMIN_ID;
+
+    let query = this.supabase
       .from('exams')
       .select('*')
       .order('created_at', { ascending: false });
+
+    // 🔥 FILTRO CRÍTICO: Si no es admin, solo ve sus propios exámenes
+    if (!IS_ADMIN) {
+      query = query.eq('visitor_id', visitorId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('❌ Error BUSCANDO exámenes:', error);
@@ -130,11 +223,10 @@ export class ExamService {
 
     let solverPromptTemplate = '';
 
-
-   if (isScience) {
-     // --- ESTRATEGIA A: CIENCIAS (Vertical, Pasos, LaTeX) ---
-     // Ideal para niños de primaria: Poco texto, mucha estructura visual.
-     solverPromptTemplate = `
+    if (isScience) {
+      // --- ESTRATEGIA A: CIENCIAS (Vertical, Pasos, LaTeX) ---
+      // Ideal para niños de primaria: Poco texto, mucha estructura visual.
+      solverPromptTemplate = `
         ROL: Ayudante de tareas de PRIMARIA experto en Matemáticas.
         OBJETIVO: Dar una solución CORTA, VERTICAL y VISUAL.
         
@@ -154,10 +246,10 @@ export class ExamService {
         4. 🛡️ MANEJO DE ERRORES: Si faltan datos en el gráfico, NO te quejes. Usa los números del enunciado y resuelve.
         5. Usa LaTeX ($...$) para todos los números y variables.
       `;
-   } else {
-     // --- ESTRATEGIA B: LETRAS (Narrativa, Directa, Sin LaTeX forzado) ---
-     // Ideal para Historia, Lenguaje, Biología.
-     solverPromptTemplate = `
+    } else {
+      // --- ESTRATEGIA B: LETRAS (Narrativa, Directa, Sin LaTeX forzado) ---
+      // Ideal para Historia, Lenguaje, Biología.
+      solverPromptTemplate = `
         ROL: Profesor de Primaria amable y directo.
         OBJETIVO: Explicar el concepto o hecho en 2 o 3 frases sencillas.
         
@@ -168,7 +260,7 @@ export class ExamService {
         4. Justifica por qué la respuesta correcta es la verdadera basándote en hechos, reglas gramaticales o teoría.
         5. Ejemplo: "Cristóbal Colón llegó a América en 1492 financiado por los Reyes Católicos." (Directo y claro).
       `;
-   }
+    }
 
     // Procesamos en paralelo (Promise.all) para velocidad
     const updatedQuestions = await Promise.all(

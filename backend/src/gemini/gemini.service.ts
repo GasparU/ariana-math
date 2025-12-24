@@ -124,7 +124,11 @@ export class GeminiService {
       TAREA: INVENTAR un examen nuevo desde cero.
       
       OBJETIVO: Generar un examen de ${num_questions} preguntas Originales.
-      MATERIA: ${subject}. TEMA: ${topic}. GRADO: ${grade_level}
+      MATERIA: ${subject}. TEMA: ${topic}. 
+      🚨 REGLA DE GRADO: La dificultad debe ser estrictamente para 6TO DE PRIMARIA. 
+      NIVEL SOLICITADO: ${difficulty} (Basico, Intermedio, Avanzado o Mixed).
+
+      ${difficulty === 'mixed' ? 'INSTRUCCIÓN MIXED: 30% Básico, 40% Intermedio, 30% Avanzado.' : ''}
       
       ${getContextInstruction(context || '')}
       ${getDifficultyPrompt(difficulty)}

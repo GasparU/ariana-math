@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { User, ShieldCheck, Rocket, Lock, ArrowLeft } from "lucide-react";
+import { telemetry } from "../../services/telemetry";
 
 const LoginScreen = ({ onLogin }) => {
   const [activeRole, setActiveRole] = useState(null);
@@ -25,6 +26,14 @@ const LoginScreen = ({ onLogin }) => {
         setPin("");
       }
     }
+  };
+
+  const handleDemoAccess = async (role) => {
+    // 1. Rastreamos al reclutador (País, Ciudad, etc.)
+    await telemetry.trackVisitor(role, "demo_login");
+
+    // 2. Ejecutamos el login con el rol elegido
+    onLogin(role);
   };
 
   const resetLogin = () => {
@@ -54,7 +63,7 @@ const LoginScreen = ({ onLogin }) => {
           {!activeRole && (
             <div className="grid grid-cols-1 gap-4">
               <button
-                onClick={() => setActiveRole("student")}
+                onClick={() => handleDemoAccess("student")}
                 className="group relative flex items-center p-4 bg-slate-800 border-2 border-slate-700 hover:border-emerald-500 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/20"
               >
                 <div className="h-12 w-12 bg-emerald-500/20 rounded-full flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors text-emerald-400">
@@ -69,7 +78,7 @@ const LoginScreen = ({ onLogin }) => {
               </button>
 
               <button
-                onClick={() => setActiveRole("parent")}
+                onClick={() => handleDemoAccess("parent")}
                 className="group relative flex items-center p-4 bg-slate-800 border-2 border-slate-700 hover:border-indigo-500 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/20"
               >
                 <div className="h-12 w-12 bg-indigo-500/20 rounded-full flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-colors text-indigo-400">

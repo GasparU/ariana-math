@@ -9,6 +9,7 @@ import {
   Menu,
   Library, // Icono para cursos
 } from "lucide-react";
+import FeedbackButton from "../common/FeedbackButton";
 
 const MainLayout = ({ children }) => {
   const navigate = useNavigate();
@@ -90,7 +91,6 @@ const MainLayout = ({ children }) => {
         </div>
       </aside>
 
-      {/* CONTENIDO PRINCIPAL */}
       <main className="flex-1 flex flex-col relative min-w-0 bg-[#F1F5F9] dark:bg-[#0B0F19]">
         {/* Header Móvil */}
         <header className="md:hidden h-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center px-4 shrink-0">
@@ -105,6 +105,7 @@ const MainLayout = ({ children }) => {
           <div className="max-w-6xl mx-auto">{children}</div>
         </div>
       </main>
+      <FeedbackButton />
     </div>
   );
 };

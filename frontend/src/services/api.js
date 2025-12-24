@@ -1,58 +1,56 @@
 import { createClient } from "@supabase/supabase-js";
-
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseKey);
+
 // Detecta si está en Vercel (Prod) o Localhost
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
+const visitorId = localStorage.getItem("app_visitor_identity");
 export const api = {
   exams: {
-    // 1. Vista Previa
-    preview: async (examData) => {
-      const response = await fetch(`${API_BASE_URL}/exams/preview`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(examData),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Error generando vista previa");
-      }
-      return await response.json();
+    preview: async (dto) => {
+      const currentId = localStorage.getItem("app_visitor_identity");
+      const res = await fetch(
+        `${API_BASE_URL}/exams/preview?visitorId=${currentId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dto),
+        }
+      );
+      return res.json();
     },
 
-    // 2. Crear / Guardar
-    create: async (examData) => {
-      const response = await fetch(`${API_BASE_URL}/exams`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(examData),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Error guardando examen");
-      }
-      return await response.json();
+    create: async (dto) => {
+      const currentId = localStorage.getItem("app_visitor_identity");
+      const res = await fetch(
+        `${API_BASE_URL}/exams?visitorId=${currentId}`, // 🔥 Quitamos el /preview
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dto),
+        }
+      );
+      return res.json();
     },
 
-    // 3. Listar todos
     list: async () => {
-      const response = await fetch(`${API_BASE_URL}/exams`);
+      const currentId = localStorage.getItem("app_visitor_identity");
+      const response = await fetch(
+        `${API_BASE_URL}/exams?visitorId=${currentId}`
+      );
       if (!response.ok) throw new Error("Error cargando lista");
       return await response.json();
     },
 
     // 4. Obtener último (o específico)
     getLatest: async () => {
-      const response = await fetch(`${API_BASE_URL}/exams`);
+      const response = await fetch(
+        `${API_BASE_URL}/exams?visitorId=${visitorId}`
+      );
       if (!response.ok) throw new Error("Error cargando exámenes");
-
       const exams = await response.json();
-      if (Array.isArray(exams) && exams.length > 0) {
-        return exams[0];
-      }
-      return null;
+      return Array.isArray(exams) && exams.length > 0 ? exams[0] : null;
     },
 
     // 5. Borrar Examen
@@ -72,6 +70,14 @@ export const api = {
         .single();
       if (error) throw error;
       return data;
+    },
+    getAll: async () => {
+      const currentId = localStorage.getItem("app_visitor_identity");
+      const response = await fetch(
+        `${API_BASE_URL}/exams?visitorId=${currentId}` // 🔥 GET simple
+      );
+      if (!response.ok) throw new Error("Error al obtener misiones");
+      return response.json();
     },
   },
 
@@ -124,6 +130,22 @@ export const api = {
 
       if (error) throw error;
       return true;
+    },
+    getAnalytics: async () => {
+      const { data, error } = await supabase
+        .from("analytics_tracking")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    getFeedback: async () => {
+      const { data, error } = await supabase
+        .from("visitor_feedback")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
     },
   },
 

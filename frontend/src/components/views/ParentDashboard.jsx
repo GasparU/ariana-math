@@ -13,10 +13,18 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
 import Swal from "sweetalert2";
 import MainLayout from "../../components/layout/MainLayout";
+import QuotaStatus from "./parentDashboard/QuotaStatus";
 
 const ParentDashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+
+  const [quotas, setQuotas] = useState({
+    geminiRemaining: 4,
+    deepseekRemaining: 10,
+    isAdmin: false,
+  });
 
   // Lista dinámica de cursos
   const [coursesList, setCoursesList] = useState([]);
@@ -40,37 +48,70 @@ const ParentDashboard = () => {
         if (window.history.state?.idx > 0) {
           window.history.replaceState(null, "", "/parent");
         }
-        const data = await api.courses.getAll();
 
-        // 1. Normalizamos: Si llega null, array vacío.
+        const data = await api.courses.getAll();
         const rawList = Array.isArray(data) ? data : [];
 
-        // 2. Mapeamos: Extraemos el nombre si es un objeto, o usamos el string si es texto.
-        // Esto arregla el conflicto de tipos.
+        // Mapeamos y normalizamos a strings
         const cleanList = rawList.map((item) => {
           if (typeof item === "object" && item !== null) {
-            return item.name || item.title || item.course || ""; // Busca propiedades comunes
+            return item.name || item.title || item.course || "";
           }
           return String(item);
         });
 
-        // 3. Filtramos vacíos y ordenamos (ahora sí son strings seguros)
-        const validList = cleanList
+        let validList = cleanList
           .filter((c) => c !== "")
           .sort((a, b) => a.localeCompare(b));
+
+        // 🔥 CAMBIO CRÍTICO: Si la lista está vacía (backend desconectado/modo demo)
+        // Inyectamos cursos por defecto para que el selector sea funcional.
+        if (validList.length === 0) {
+          validList = ["Matemática", "Comunicación", "Historia", "Ciencias"];
+        }
 
         setCoursesList(validList);
 
         if (validList.length > 0) {
-          // Nota: aquí asegúrate de si 'course' en MissionParams espera un string o un objeto.
-          // Con este cambio, estamos guardando el STRING (ej: "Matemática").
           setMissionParams((prev) => ({ ...prev, course: validList[0] }));
         }
       } catch (error) {
         console.error("Error cargando cursos:", error);
+        // 🔥 Respaldo en caso de error de red
+        const fallback = ["Matemática", "Comunicación"];
+        setCoursesList(fallback);
+        setMissionParams((prev) => ({ ...prev, course: fallback[0] }));
       }
     };
     fetchCourses();
+    const syncQuotas = async () => {
+      try {
+        const data = await api.exams.list();
+        const exams = Array.isArray(data) ? data : [];
+
+        const geminiUsed = exams.filter((e) =>
+          e.content?.usedModel?.toLowerCase().includes("gemini")
+        ).length;
+
+        const deepseekUsed = exams.filter((e) =>
+          e.content?.usedModel?.toLowerCase().includes("deepseek")
+        ).length;
+
+        const currentVisitor = localStorage.getItem("app_visitor_identity");
+
+        setQuotas({
+          geminiRemaining: Math.max(0, 4 - geminiUsed),
+          deepseekRemaining: Math.max(0, 10 - deepseekUsed),
+          // 🔥 CAMBIO AQUÍ: Verifica tu ID de Admin dinámicamente
+          isAdmin: currentVisitor === "02e393ce-f956-442b-910e-bcef69bffa1d",
+        });
+      } catch (error) {
+        console.error("Error sincronizando cuotas:", error);
+      }
+    };
+
+    fetchCourses();
+    syncQuotas();
   }, []);
 
   const handleChange = (field, value) => {
@@ -130,6 +171,10 @@ const ParentDashboard = () => {
 
       // Llamada a la API
       const response = await api.exams.preview(examPayload);
+
+      if (response.stats) {
+        setQuotas(response.stats);
+      }
 
       navigate("/parent/preview", {
         state: { examData: response, params: missionParams },
@@ -389,6 +434,9 @@ const ParentDashboard = () => {
                   label="Motor IA"
                   value={missionParams.iaModel.split(" ")[0]}
                 />
+              </div>
+              <div className="mb-6 px-1">
+                <QuotaStatus stats={quotas} isAdmin={quotas.isAdmin} />
               </div>
 
               <button
