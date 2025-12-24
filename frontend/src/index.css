@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Scrollbar Moderno */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    /* Muy delgado */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    /* Color suave light */
+    border-radius: 10px;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #334155;
+    /* Color suave dark */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #64748b;
+    /* Color al pasar mouse */
+}
+
+/* Forzar estilos para JSXGraph */
+.jxgbox {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 400px;
+    /* Seguridad para que no colapse */
+    border-radius: 1rem;
+    background-color: transparent;
+    /* Dejar ver la cuadrícula de fondo */
+}
+
+/* Ocultar botón de copyright y navegación para que se vea limpio */
+.jsxgraph-copyright,
+.jsxgraph-navigation {
+    display: none !important;
+}
+
+.katex * {
+    border-color: currentColor !important;
+    /* Fuerza que use el color del texto */
+}
+
+.katex .sqrt>.root {
+    border-top: 1px solid currentColor !important;
+    /* IMPORTANTE: 'solid' es la clave */
+    margin-top: -1px;
+    /* Ajuste fino para conectar con el símbolo V */
+}
+
+.katex .frac-line {
+    border-bottom: 1px solid currentColor !important;
+}
+
+/* Opcional: Asegura que el símbolo de raíz SVG no se oculte */
+.katex path {
+    stroke: currentColor !important;
+}
+.katex .frac-line {
+    border-bottom-width: 1px;
+    border-color: currentColor;
+    /* Asegura que no sea invisible ni muy gruesa */
+}
+
+/* 3. Arreglo específico para la raíz cuadrada */
+.katex .sqrt>.root {
+    border-top-width: 1px;
+    border-color: currentColor;
+    margin-top: -1px;
+}
+
+/* 4. Arreglo para simbolos SVG (como la raiz extendida) */
+.katex path {
+    stroke: currentColor;
+}
