@@ -13,7 +13,7 @@ POST /preview: Genera un examen volátil con IA (no guarda en BD) para que el us
 
 POST /: Guarda el examen aprobado. Dispara el agente "Solver-on-Save".
 
-GET /: Lista el historial de exámenes creados.
+GET /: Lista el historial de exámenes creados. 
 
 ExamService:
 
