@@ -1,0 +1,6 @@
+# .dockerignore dentro de la carpeta backend
+node_modules
+dist
+.git
+.env
+../frontend  # 🔥 Forzamos la exclusión de la carpeta hermana si existiera un rastro
