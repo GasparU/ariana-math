@@ -1,33 +1,38 @@
-# Usa una versión estable y ligera de Node.js
-FROM node:20-alpine AS builder
+# syntax = docker/dockerfile:1
 
+# Usamos una versión estable de Node
+ARG NODE_VERSION=20
+FROM node:${NODE_VERSION}-alpine AS base
+
+# Directorio de trabajo
 WORKDIR /app
 
-# Copia los archivos de definición de dependencias
-# Usamos comodín para package.json y lock si existe
+# Etapa de construcción
+FROM base AS build
+
+# Copiamos archivos de dependencias
+# Usamos comodín para que no falle si falta el .lock
 COPY package*.json ./
 
-# Instalamos TODAS las dependencias para poder compilar
+# Instalamos dependencias (usamos install en vez de ci para mayor flexibilidad en deploy)
 RUN npm install
 
-# Copiamos el resto del código del backend
+# Copiamos el resto del código
 COPY . .
 
-# Construimos el proyecto (genera la carpeta dist)
+# Construimos la aplicación NestJS
 RUN npm run build
 
-# --- ETAPA DE PRODUCCIÓN ---
-FROM node:20-alpine
+# Etapa final
+FROM base
 
-WORKDIR /app
+# Copiamos solo lo necesario desde el build
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
 
-# Copiamos solo lo necesario desde la etapa de construcción
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-
-# NestJS por defecto corre en el 3000, Railway/Fly lo mapean automáticamente
+# Exponemos el puerto 3000
 EXPOSE 3000
 
-# Comando para arrancar en producción
-CMD ["node", "dist/main"]
+# Comando de inicio directo al archivo compilado
+CMD [ "node", "dist/main" ]
