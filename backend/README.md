@@ -5,7 +5,7 @@
 
 
 Módulo: EXAM (src/exam)
-Encargado de la creación y gestión de pruebas.
+Encargado de la creación y gestión de pruebas. 
 
 ExamController:
 
