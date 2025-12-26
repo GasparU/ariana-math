@@ -43,7 +43,7 @@ const LoginScreen = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans">
-      <div className="max-w-md w-full space-y-8 animate-in zoom-in duration-500">
+      <div className="w-full max-w-sm md:max-w-md space-y-8 animate-in zoom-in duration-500 mx-auto">
         {/* Logo Header */}
         <div className="text-center">
           <div className="mx-auto h-20 w-20 bg-indigo-500/20 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(99,102,241,0.3)]">

@@ -73,7 +73,7 @@ export const UploadSection = () => {
         Cargar Biblioteca (RAG)
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         {/* COLUMNA IZQUIERDA: Archivo y Curso */}
         <div className="space-y-4">
           {/* Selector de Curso */}

@@ -56,19 +56,22 @@ export const RagInventory = () => {
   ];
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-xl mt-6 border border-gray-100">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-black text-gray-800 flex items-center gap-2 uppercase tracking-tight">
-          <BookOpen className="w-7 h-7 text-indigo-600" />
-          Biblioteca de Conocimiento RAG
+    // 1. MEJORA: Padding responsive (p-4 en móvil, p-6 en PC) para ganar espacio
+    <div className="p-4 md:p-6 bg-white rounded-lg shadow-xl mt-6 border border-gray-100">
+      {/* 2. MEJORA: Header en columna para móvil, fila para PC */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h2 className="text-xl md:text-2xl font-black text-gray-800 flex items-center gap-2 uppercase tracking-tight">
+          <BookOpen className="w-6 h-6 md:w-7 md:h-7 text-indigo-600" />
+          Biblioteca RAG
         </h2>
-        <span className="text-[10px] bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest border border-amber-200">
+        <span className="text-[10px] bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest border border-amber-200 whitespace-nowrap">
           Modo Demo Activo
         </span>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-gray-200">
-        <table className="w-full text-left border-collapse bg-white">
+      {/* 3. MEJORA: Quitamos 'overflow-hidden' para asegurar que el scroll funcione */}
+      <div className="rounded-lg border border-gray-200 overflow-x-auto">
+        <table className="w-full text-left border-collapse bg-white min-w-[600px]">
           <thead>
             <tr className="bg-gray-50 text-gray-500 uppercase text-xs tracking-wider border-b border-gray-200">
               <th className="py-4 px-6 font-semibold">Estado AI</th>

@@ -38,10 +38,10 @@ const StudentLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] flex font-sans transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] transition-colors duration-300">
       {/* SIDEBAR DESKTOP */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transform transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -107,7 +107,10 @@ const StudentLayout = ({ children }) => {
               return (
                 <button
                   key={item.path}
-                  onClick={() => navigate(item.path)}
+                  onClick={() => {
+                    navigate(item.path);
+                    setIsSidebarOpen(false); // Cierra el menú al navegar
+                  }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
                     isActive
                       ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
@@ -123,8 +126,6 @@ const StudentLayout = ({ children }) => {
 
           {/* Footer Sidebar */}
           <div className="p-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
-
-
             {/* Salir */}
             <button
               onClick={handleLogout}

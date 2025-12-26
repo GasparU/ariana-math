@@ -128,7 +128,7 @@ const ParentExamPreview = () => {
   return (
     <div className="min-h-screen bg-slate-900 p-6 pb-24 overflow-y-auto">
       {/* HEADER DE CONTROL */}
-      <div className="max-w-5xl mx-auto mb-8 flex justify-between items-center bg-slate-800 p-4 rounded-2xl border border-slate-700 sticky top-0 z-50 shadow-xl">
+      <div className="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-800 p-4 rounded-2xl border border-slate-700 sticky top-0 z-50 shadow-xl">
         <div>
           <h1 className="text-xl font-bold text-white uppercase tracking-wider">
             {exam.topic}

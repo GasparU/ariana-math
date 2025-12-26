@@ -3,7 +3,7 @@ import { Database } from 'lucide-react';
 
 export const IngestHeader = () => {
   return (
-    <div className="flex items-center gap-4 mb-8">
+    <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-8">
       <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl shadow-sm">
         <Database size={28} />
       </div>

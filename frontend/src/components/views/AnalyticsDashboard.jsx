@@ -47,8 +47,8 @@ const AnalyticsDashboard = () => {
         </div>
 
         {/* TABLA DE VISITAS */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
-          <table className="w-full text-left border-collapse">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[600px]">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
                 <th className="p-4">

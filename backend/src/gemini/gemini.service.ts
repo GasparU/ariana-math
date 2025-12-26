@@ -196,7 +196,7 @@ export class GeminiService {
     // 5. EJECUCIÓN IA (SE MANTIENE IGUAL)
     let rawJson = '';
     try {
-      const creativeTemp = 0.1;
+      const creativeTemp = 0.4;
 
       if (aiModel && aiModel.toLowerCase().includes('gemini')) {
         console.log(`⚡ Ejecutando Gemini (${aiModel || 'default'})...`);

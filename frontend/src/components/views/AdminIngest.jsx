@@ -15,9 +15,16 @@ const uploadOptions = [
 const AdminIngest = () => {
   return (
     <MainLayout>
+      {/* NOTA PARA EL RECLUTADOR */}
+      <div className="mt-8 p-4 bg-amber-50 border border-amber-100 rounded-2xl text-center">
+        <p className="text-[10px] text-amber-700 font-bold uppercase tracking-widest">
+          Nota: Para proteger cuotas de API, la subida de archivos está en modo
+          simulación. Los vectores ya están disponibles en la base de datos.
+        </p>
+      </div>
       <div className="max-w-4xl mx-auto py-6">
         {/* HEADER */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {uploadOptions.map((opt) => (
             <div
               key={opt.id}
@@ -36,15 +43,6 @@ const AdminIngest = () => {
               </button>
             </div>
           ))}
-        </div>
-
-        {/* NOTA PARA EL RECLUTADOR */}
-        <div className="mt-8 p-4 bg-amber-50 border border-amber-100 rounded-2xl text-center">
-          <p className="text-[10px] text-amber-700 font-bold uppercase tracking-widest">
-            Nota: Para proteger cuotas de API, la subida de archivos está en
-            modo simulación. Los vectores ya están disponibles en la base de
-            datos.
-          </p>
         </div>
       </div>
     </MainLayout>

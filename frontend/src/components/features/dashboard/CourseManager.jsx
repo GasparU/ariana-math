@@ -144,7 +144,7 @@ const CourseManager = () => {
   return (
     <MainLayout>
       <div className="flex flex-col gap-6 pb-20">
-        <div className="flex justify-between items-end border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
           <div>
             <h1 className="text-xl font-black uppercase tracking-tight text-slate-800 dark:text-white flex items-center gap-2">
               <Book className="text-indigo-600" /> Biblioteca & Cursos RAG
@@ -196,21 +196,21 @@ const CourseManager = () => {
                     Editando: {editingId}
                   </span>
                 )}
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     autoFocus
                     type="text"
                     placeholder="Nombre (ej: Álgebra)"
                     value={courseName}
                     onChange={(e) => setCourseName(e.target.value)}
-                    className="flex-1 px-3 py-2 text-sm font-bold text-slate-700 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full sm:flex-1 px-3 py-2 text-sm font-bold text-slate-700 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                   <input
                     type="text"
                     placeholder="Desc. Opcional"
                     value={courseDesc}
                     onChange={(e) => setCourseDesc(e.target.value)}
-                    className="w-1/3 px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full sm:w-1/3 px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
                 <div className="flex items-center justify-end gap-2">
