@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 export const UploadSection = () => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -49,7 +51,7 @@ export const UploadSection = () => {
 
       // 2. Enviar al Backend (Asegúrate de que la URL sea correcta)
       // Ajusta la URL si tu backend está en otro puerto
-      await axios.post("http://localhost:3000/rag/upload", formData, {
+      await axios.post(`${API_BASE_URL}/rag/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
