@@ -15,7 +15,7 @@ FROM base AS build
 COPY package*.json ./
 
 # Instalamos dependencias (usamos install en vez de ci para mayor flexibilidad en deploy)
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copiamos el resto del código
 COPY . .
