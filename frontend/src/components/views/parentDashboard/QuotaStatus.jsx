@@ -39,8 +39,8 @@ const QuotaStatus = ({ stats, isAdmin }) => {
 
         {/* Cuota DeepSeek */}
         <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
-          <div className="flex justify-between text-[10px] font-bold uppercase mb-1">
-            <span>DeepSeek V3</span>
+          <div className="flex justify-between text-[9px] font-bold uppercase mb-1">
+            <span>DeepSeek</span>
             <span
               className={
                 stats.deepseekRemaining === 0
